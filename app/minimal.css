@@ -1,0 +1,93 @@
+/* ============ Estilo alternativo: Minimal (Linear/Vercel) ============
+   Ativo quando <html> tem a classe "estilo-minimal".
+   Neutros, bordas de 1px, sem sombras, cantos discretos; cor só para significado. */
+html.estilo-minimal {
+  --m-bg: #fafafa;
+  --m-surface: #ffffff;
+  --m-border: #e6e6e8;
+  --m-border-strong: #d4d4d8;
+  --m-hover: #f4f4f5;
+
+  --ink: #18181b;
+  --ink-soft: #52525b;
+  --ink-faint: #71717a;
+  --accent: #18181b;
+  --accent-ink: #ffffff;
+  --accent-glow: rgba(24, 24, 27, 0.12);
+
+  --fe: #2563eb;  --fe-soft: #eff4ff;
+  --ux: #9333ea;  --ux-soft: #f7f0fe;
+  --hy: #0d9488;  --hy-soft: #effcfa;
+  --good: #15803d; --good-soft: #f0fbf3;
+  --mid: #a16207;  --mid-soft: #fdf8ec;
+  --low: #71717a;  --low-soft: #f4f4f5;
+  --warn: #b91c1c; --warn-soft: #fef3f2;
+}
+@media (prefers-color-scheme: dark) {
+  html.estilo-minimal {
+    --m-bg: #0b0b0d;
+    --m-surface: #131316;
+    --m-border: #26262b;
+    --m-border-strong: #34343a;
+    --m-hover: #1b1b1f;
+    --ink: #f4f4f5;
+    --ink-soft: #a1a1aa;
+    --ink-faint: #7c7c86;
+    --accent: #f4f4f5;
+    --accent-ink: #0b0b0d;
+    --accent-glow: rgba(244, 244, 245, 0.14);
+    --fe: #7aa2ff; --fe-soft: #121a2e;
+    --ux: #c39bff; --ux-soft: #1d1428;
+    --hy: #4fd1c5; --hy-soft: #0f2321;
+    --good: #5bd48a; --good-soft: #10221a;
+    --mid: #e6b45a; --mid-soft: #261f10;
+    --low: #9a9aa4; --low-soft: #1b1b1f;
+    --warn: #f08b7d; --warn-soft: #2a1513;
+  }
+}
+
+html.estilo-minimal body { background: var(--m-bg); font-size: 14px; }
+html.estilo-minimal body::before { display: none; }
+
+html.estilo-minimal :is(.topbar, .tabs, .chip, .card, .search input, .banner, .act, .empty, .estilo-toggle) {
+  background: var(--m-surface);
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
+  border: 1px solid var(--m-border);
+  box-shadow: none;
+}
+
+html.estilo-minimal .topbar { border-width: 0 0 1px; background: color-mix(in srgb, var(--m-bg) 88%, transparent); -webkit-backdrop-filter: blur(8px); backdrop-filter: blur(8px); }
+html.estilo-minimal .brand .s { color: var(--ink-faint); }
+html.estilo-minimal .search input { border-radius: 8px; padding-block: 8px; }
+html.estilo-minimal .search input:focus { border-color: var(--m-border-strong); box-shadow: 0 0 0 3px var(--accent-glow); }
+
+html.estilo-minimal .estilo-toggle { border-radius: 8px; }
+html.estilo-minimal .estilo-toggle button { border-radius: 6px; }
+html.estilo-minimal .estilo-toggle button[aria-pressed="true"] { background: var(--m-hover); box-shadow: none; }
+
+html.estilo-minimal .tabs { border-radius: 8px; padding: 3px; }
+html.estilo-minimal .tab { border-radius: 6px; padding: 6px 12px; }
+html.estilo-minimal .tab[aria-selected="true"] { background: var(--m-hover); box-shadow: none; }
+html.estilo-minimal .tab .badge { background: var(--m-border); color: var(--ink-soft); }
+
+html.estilo-minimal .chip { border-radius: 6px; padding: 4px 10px; }
+html.estilo-minimal .chip:hover { background: var(--m-hover); }
+html.estilo-minimal .chip[aria-pressed="true"] { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); box-shadow: none; }
+
+html.estilo-minimal .grid { gap: 12px; }
+html.estilo-minimal .card { border-radius: 10px; padding: 18px; background-image: none; transition: border-color .15s; }
+html.estilo-minimal .card:hover { transform: none; background-color: var(--m-surface); border-color: var(--m-border-strong); box-shadow: none; }
+html.estilo-minimal .frente, html.estilo-minimal .status-pill { border-radius: 5px; border-color: transparent; }
+html.estilo-minimal .nota { border-radius: 8px; box-shadow: none; border-color: color-mix(in srgb, var(--nota-color) 20%, transparent); }
+html.estilo-minimal .alert { border-radius: 6px; border-color: transparent; }
+html.estilo-minimal .foot { border-top: 1px solid var(--m-border); }
+
+html.estilo-minimal .ver-vaga { border-radius: 8px; border: none; box-shadow: none; padding-block: 10px; font-weight: 600; }
+html.estilo-minimal .ver-vaga:hover { transform: none; box-shadow: none; opacity: .88; }
+html.estilo-minimal .act { border-radius: 8px; }
+html.estilo-minimal .act:hover { background: var(--m-hover); }
+html.estilo-minimal .act.enviar { background: var(--m-surface); border-color: var(--m-border); }
+html.estilo-minimal .act.enviar:hover { background: var(--good-soft); border-color: color-mix(in srgb, var(--good) 35%, transparent); }
+
+html.estilo-minimal .empty, html.estilo-minimal .banner { border-radius: 10px; }

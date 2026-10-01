@@ -37,6 +37,11 @@ const IconWarn = () => (
   <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z" /><line x1="12" y1="9" x2="12" y2="13" /><line x1="12" y1="17" x2="12.01" y2="17" /></svg>
 );
 
+const ESTILOS = [
+  { id: "vidro", nome: "Vidro" },
+  { id: "minimal", nome: "Minimal" },
+];
+
 export default function Home() {
   const [vagas, setVagas] = useState([]);
   const [backend, setBackend] = useState("");
@@ -45,6 +50,22 @@ export default function Home() {
   const [frente, setFrente] = useState("all");
   const [min, setMin] = useState(0);
   const [q, setQ] = useState("");
+  const [estilo, setEstilo] = useState("vidro");
+
+  // estilo visual: lê a escolha salva (o layout já aplica a classe antes da pintura)
+  useEffect(() => {
+    try {
+      const s = localStorage.getItem("painel-estilo");
+      if (ESTILOS.some((e) => e.id === s)) setEstilo(s);
+    } catch {}
+  }, []);
+  function trocarEstilo(id) {
+    setEstilo(id);
+    const html = document.documentElement;
+    for (const e of ESTILOS) html.classList.remove(`estilo-${e.id}`);
+    if (id !== "vidro") html.classList.add(`estilo-${id}`); // "vidro" é o CSS base, sem classe
+    try { localStorage.setItem("painel-estilo", id); } catch {}
+  }
 
   async function load() {
     setLoading(true);
@@ -101,6 +122,11 @@ export default function Home() {
               value={q}
               onChange={(e) => setQ(e.target.value)}
             />
+          </div>
+          <div className="estilo-toggle" role="group" aria-label="Estilo visual">
+            {ESTILOS.map((e) => (
+              <button key={e.id} aria-pressed={estilo === e.id} onClick={() => trocarEstilo(e.id)}>{e.nome}</button>
+            ))}
           </div>
         </div>
       </header>
