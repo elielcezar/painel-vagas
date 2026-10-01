@@ -1,0 +1,2 @@
+# Entradas diárias da busca noturna (JSON) chegam aqui e são importadas com:
+#   npm run importar -- entradas/AAAAMMDD.json

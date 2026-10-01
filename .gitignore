@@ -1,0 +1,9 @@
+node_modules
+.next
+out
+.env*.local
+# armazenamento local (fallback sem Mongo) — dados reais não vão pro git
+data/vagas.json
+# entradas diárias da busca noturna (dados coletados; ficam fora do git)
+entradas/*.json
+npm-debug.log*

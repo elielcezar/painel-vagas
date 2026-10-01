@@ -1,103 +1,91 @@
-# Busca de vagas & Currículos — Eliel Cezar
+# Busca de vagas & Painel — Eliel Cezar
 
-Guia rápido do projeto: uma rotina para **buscar e triar vagas/freelas** e um gerador de **currículos** em duas versões (ATS e visual).
+Rotina para **buscar e triar vagas** + um **painel** (Next.js + MongoDB) onde elas acumulam,
+são triadas e arquivadas.
 
 > A IA **não se candidata a nada** — só pesquisa, lê e sugere. O envio é sempre manual.
+> O gerador de currículos fica em um **projeto separado**.
 
 ---
 
-## 🌙 Rotina noturna de busca
+## 🌙 Rotina noturna
 
-Com o **Chrome aberto e logado** (LinkedIn/Gupy) e o Claude in Chrome conectado, é só pedir:
+Com o **Chrome aberto e logado** (LinkedIn/Gupy) e o Claude in Chrome conectado, peça:
 
-> **"busca noturna"**  (ou "rodar a busca de vagas")
+> **"busca noturna"**
 
-O que acontece automaticamente:
-1. Busca em **LinkedIn, Gupy e Workana** (abas novas, sem mexer nas suas).
-2. Triagem de cada item: frente, tipo (vaga/freela), nota 0–10, alertas, currículo sugerido.
-3. Salva o resultado do dia em **`resultados/AAAAMMDD.html`** (abre no navegador).
-4. Atualiza a página online (Artifact) no **mesmo link** de sempre — mostrando **só os resultados daquela noite** (substitui, não acumula; o histórico fica nos arquivos `resultados/`).
-5. Resumo no chat com os destaques e o que mudou desde a noite anterior.
+O que acontece:
+1. Busca em **LinkedIn, Gupy e Workana** (abas novas), incluindo a frente **Agências / Curitiba** (presencial + híbrido).
+2. Triagem: frente, nota 0–10, alertas, currículo sugerido.
+3. As vagas do dia são gravadas em `entradas/AAAAMMDD.json` e **importadas no painel** (`npm run importar`).
+4. Resumo no chat com destaques e quantas vagas novas entraram.
 
-**Importante:** a busca precisa do seu login no Chrome, então **não roda sozinha de madrugada**. O fluxo é: antes de dormir você dispara, ela roda em alguns minutos e publica; de manhã você abre pronto.
-
-Página online (link fixo):
-`https://claude.ai/code/artifact/9f2f062f-dd7c-45d9-99df-2d7300860985`
-
-Filtros na página: **frente** (Front-end / UI/UX / Híbrida), **tipo** (vaga / freela) e **nota mínima**.
+A busca precisa do seu login no Chrome, então **não roda sozinha de madrugada**: você dispara à noite, ela coleta/importa, e de manhã você revisa no painel.
 
 ---
 
-## 📄 Currículos
+## 📊 Painel
 
-Todos saem de **uma fonte de dados só**: o objeto `VERSOES` em `gerador/gerar.js`
-(mais `CONTATO`, `FORMACAO`, `IDIOMAS`). **Regra de ouro: nunca inventar experiência** —
-usar só o que está ali. Dos mesmos dados saem dois formatos:
-
-| Formato | Comando | Onde | Quando usar |
-|---|---|---|---|
-| **ATS** (`.docx`) | `node gerar.js` | raiz do projeto | Candidaturas (Gupy, LinkedIn, qualquer ATS) |
-| **Visual** (`.html`) | `node gerar-visual.js` | `curriculo/` | Envio direto para pessoas, portfólio, PDF |
-
-### Gerar / atualizar tudo
 ```bash
-cd gerador
-node gerar.js          # gera os .docx (ATS)
-node gerar-visual.js   # gera os .html visuais
+npm install       # primeira vez
+npm run dev       # abre em http://localhost:3000
 ```
 
-### Gerar o PDF
-Abra o arquivo `curriculo/<nome>-visual.html` no navegador e clique em
-**"Imprimir / Salvar em PDF"** (ou Ctrl+P → Salvar como PDF).
+- **Início:** vagas novas. Botões **CV Enviado** / **Dispensar** → mandam a vaga para o **Arquivo**.
+- **Arquivo:** enviadas/dispensadas (com **↩ Voltar para Início**).
+- **Busca** por texto no header + filtros de **frente** e **nota**.
+- **Dedup automático:** cada vaga tem `_id` estável; reimportar não duplica e mantém o status.
 
-### Criar uma versão personalizada para uma vaga
-No `gerador/gerar.js`, adicione ao final (reaproveitando as experiências reais de uma base):
-```js
-VERSOES["Eliel-Cezar-NomeDaEmpresa"] = {
-  cargo: "Cargo  |  Palavras-chave da vaga",
-  kicker: "Texto do topo (só no visual)",     // opcional
-  role: "Frase abaixo do nome (só no visual)", // opcional
-  resumo: "Resumo ajustado à vaga...",
-  competencias: [ ["Rótulo", "itens..."], /* ... */ ],
-  experiencias: VERSOES["Eliel-Cezar-Front-end"].experiencias, // ou -UI-UX / -Hibrido
-};
+### MongoDB
+Sem configuração, o painel usa um **arquivo local** (`data/vagas.json`, a partir de `data/vagas.seed.json`) — dá pra testar na hora.
+
+Para ligar o **MongoDB Atlas**:
+1. Copie `.env.local.example` → `.env.local`.
+2. Cole a connection string em `MONGODB_URI` (contém usuário/senha — **não** compartilhe; fica fora do git).
+3. Reinicie o `npm run dev`.
+
+Testar a conexão importando o seed:
+```bash
+npm run importar -- data/vagas.seed.json     # deve mostrar "Backend: MongoDB"
 ```
-Depois rode os dois geradores. Saem o `.docx` e o `.html` da nova versão.
 
-### Versões atuais
-- **Base:** `Eliel-Cezar-Front-end`, `Eliel-Cezar-UI-UX`, `Eliel-Cezar-Hibrido`
-- **Personalizadas:** `Eliel-Cezar-Sympla-Frontend`, `Eliel-Cezar-Avenue-UIUX`, `Eliel-Cezar-ERP-DesignEngineer`
+### Alimentar o painel (formato da entrada)
+`entradas/AAAAMMDD.json` — array de vagas. `_id = "<fonte>:<jobId>"` (chave de dedup):
+```json
+{ "_id": "linkedin:4466160189", "fonte": "LinkedIn",
+  "titulo": "…", "empresa": "…", "local": "Brasil · Remoto",
+  "frente": "Front-end", "nota": 9, "motivo": "…", "alertas": ["…"],
+  "cv": "Front-end", "cvFile": "Eliel-Cezar-Front-end.docx",
+  "link": "https://www.linkedin.com/jobs/view/4466160189/" }
+```
+```bash
+npm run importar -- entradas/AAAAMMDD.json
+```
+
+### API
+- `GET /api/vagas` — lista todas.
+- `POST /api/vagas` — importa/upsert (`{ vagas: [...] }`).
+- `PATCH /api/vagas/:id` — muda status (`{ "status": "enviado" | "dispensado" | "novo" }`).
 
 ---
 
 ## 📁 Estrutura
 
 ```
-curriculos/
-├─ CLAUDE.md                     # instruções para a IA (runbook detalhado)
-├─ README.md                     # este arquivo
-├─ Eliel-Cezar-*.docx            # currículos ATS (gerados)
-├─ gerador/
-│  ├─ gerar.js                   # dados + geração dos .docx (ATS)
-│  └─ gerar-visual.js            # geração dos .html visuais (template)
-├─ curriculo/
-│  └─ Eliel-Cezar-*-visual.html  # currículos visuais (gerados)
-├─ resultados/
-│  └─ AAAAMMDD.html              # resultado de cada busca noturna
-└─ vagas/
-   └─ coletar_gupy.py            # coletor via API da Gupy (alternativa; não usado)
+.
+├─ CLAUDE.md            # runbook da busca noturna + painel (para a IA)
+├─ README.md            # este guia
+├─ app/                 # UI (page.jsx) + API routes (app/api/vagas)
+├─ lib/                 # camada de dados: store / mongo / fileStore
+├─ scripts/importar.mjs # importador (usado pela busca noturna)
+├─ data/                # vagas.seed.json (exemplo) e vagas.json (local, fora do git)
+├─ entradas/            # AAAAMMDD.json — vagas coletadas por noite (histórico)
+└─ .env.local           # MONGODB_URI (fora do git)
 ```
 
 ---
 
-## ✅ Regras que valem lembrar
-- **Não inventar experiência** nos currículos — só o que está no `gerador`.
-- **Testes automatizados** (Jest/RTL/Cypress) estão **em aprendizado** — aparecem marcados assim.
-- **ATS para candidatura, visual para humano.** O `.docx` simples é lido melhor pelos
-  sistemas de recrutamento (uma coluna, sem tabela/imagem, texto selecionável); o visual
-  é para impressionar quem vai olhar de perto.
-- **Só Brasil por enquanto:** remoto no Brasil ou híbrido/presencial em Curitiba/PR.
-  Níveis Pleno, Sênior, Tech Lead/Staff (sem estágio/júnior/trainee).
-- **Inclui agências de publicidade**, não só empresas de tech — a busca tem uma frente
-  específica de Curitiba (presencial + híbrido) e títulos de agência (Webdesigner,
-  Desenvolvedor Web/WordPress), que as buscas remotas deixavam de fora.
+## ✅ Regras
+- **Só Brasil por enquanto:** remoto no Brasil ou híbrido/presencial em Curitiba/PR. Níveis Pleno/Sênior/Tech Lead (sem estágio/júnior/trainee).
+- **Inclui agências de publicidade**, não só tech (frente Curitiba presencial+híbrido).
+- **99Freelas descartada** (qualidade baixa).
