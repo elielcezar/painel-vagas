@@ -32,10 +32,11 @@ sem jobId, usar `"<fonte>:<slug-empresa-titulo>"`. `frente` deve ser exatamente 
 { "_id": "linkedin:4466160189", "fonte": "LinkedIn",
   "titulo": "…", "empresa": "…", "local": "Brasil · Remoto",
   "frente": "Front-end", "nota": 9, "motivo": "…", "alertas": ["…"],
-  "cv": "Front-end", "cvFile": "Eliel-Cezar-Front-end.docx",
+  "postada": "há 2 dias",
   "link": "https://www.linkedin.com/jobs/view/4466160189/" }
 ```
-(`cv`/`cvFile` são só rótulos exibidos no card, apontando qual currículo usar — os arquivos ficam no projeto separado.)
+- `postada` (opcional): quando a vaga foi **publicada**, como aparece na fonte (ex.: `"há 2 dias"`, `"25/09/2026"`). Preencher sempre que a página mostrar; o card exibe junto da data de coleta.
+- A **data/hora de coleta** não vai no JSON: o import grava `firstSeen` automaticamente e o card mostra “Coletada DD/MM/AAAA HH:MM”.
 
 ### Receita de busca (URLs prontas)
 LinkedIn — filtros: `f_WT=2` (remoto), `f_E=3,4,5` (pleno/sênior/diretor; exclui estágio e júnior):
@@ -72,7 +73,7 @@ Dicas: `get_page_text` no card selecionado do LinkedIn traz a descrição inteir
 - Frente: Front-end, UI/UX ou Híbrida.
 - Compatibilidade de 0 a 10, com o motivo.
 - Alertas: inglês fluente obrigatório, tecnologia que ele não domina, modelo de trabalho incompatível, vaga exclusiva PcD, PJ, nível abaixo do perfil.
-- Qual currículo usar (`cv`/`cvFile` no card).
+- Data de publicação (`postada`), quando a fonte informar.
 
 ## O painel (este projeto)
 App Next.js na **raiz** do projeto (não há mais subpasta `painel/`).

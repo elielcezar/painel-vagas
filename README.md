@@ -55,9 +55,10 @@ npm run importar -- data/vagas.seed.json     # deve mostrar "Backend: MongoDB"
 { "_id": "linkedin:4466160189", "fonte": "LinkedIn",
   "titulo": "…", "empresa": "…", "local": "Brasil · Remoto",
   "frente": "Front-end", "nota": 9, "motivo": "…", "alertas": ["…"],
-  "cv": "Front-end", "cvFile": "Eliel-Cezar-Front-end.docx",
+  "postada": "há 2 dias",
   "link": "https://www.linkedin.com/jobs/view/4466160189/" }
 ```
+`postada` é opcional (quando a fonte mostra a data de publicação). A data/hora de **coleta** é gravada automaticamente no import (`firstSeen`).
 ```bash
 npm run importar -- entradas/AAAAMMDD.json
 ```

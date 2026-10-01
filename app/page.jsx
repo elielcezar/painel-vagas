@@ -10,6 +10,17 @@ const FRENTE = {
 const notaVars = (n) =>
   n >= 8 ? { c: "var(--good)", s: "var(--good-soft)" } : n >= 6 ? { c: "var(--mid)", s: "var(--mid-soft)" } : { c: "var(--low)", s: "var(--low-soft)" };
 
+function fmtColeta(iso) {
+  if (!iso) return null;
+  try {
+    return new Date(iso)
+      .toLocaleString("pt-BR", { day: "2-digit", month: "2-digit", year: "numeric", hour: "2-digit", minute: "2-digit" })
+      .replace(", ", " às ");
+  } catch {
+    return null;
+  }
+}
+
 const IconSearch = () => (
   <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><circle cx="11" cy="11" r="7" /><line x1="21" y1="21" x2="16.65" y2="16.65" /></svg>
 );
@@ -28,7 +39,6 @@ export default function Home() {
   const [frente, setFrente] = useState("all");
   const [min, setMin] = useState(0);
   const [q, setQ] = useState("");
-  const [toast, setToast] = useState("");
 
   async function load() {
     setLoading(true);
@@ -43,11 +53,6 @@ export default function Home() {
   }
   useEffect(() => { load(); }, []);
 
-  function flash(msg) {
-    setToast(msg);
-    setTimeout(() => setToast(""), 2200);
-  }
-
   async function setStatus(id, status) {
     // otimista
     setVagas((prev) => prev.map((v) => (v._id === id ? { ...v, status } : v)));
@@ -56,13 +61,6 @@ export default function Home() {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ status }),
     });
-  }
-
-  function copyCmd() {
-    navigator.clipboard?.writeText("busca noturna").then(
-      () => flash('Comando "busca noturna" copiado — cole no chat do Claude.'),
-      () => flash('Diga "busca noturna" ao Claude para atualizar.')
-    );
   }
 
   const counts = useMemo(() => {
@@ -97,10 +95,6 @@ export default function Home() {
               value={q}
               onChange={(e) => setQ(e.target.value)}
             />
-          </div>
-          <div className="run">
-            <button className="run-btn" onClick={copyCmd}>⚡ Rodar busca</button>
-            <span className="run-hint">Copia o comando <b>busca noturna</b> — cole no chat do Claude para coletar novas vagas.</span>
           </div>
         </div>
       </header>
@@ -161,6 +155,7 @@ export default function Home() {
             const fv = FRENTE[v.frente] || { c: "var(--line)", s: "var(--surface-2)" };
             const nv = notaVars(v.nota ?? 0);
             const style = { "--frente-color": fv.c, "--frente-soft": fv.s, "--nota-color": nv.c, "--nota-soft": nv.s };
+            const coleta = fmtColeta(v.firstSeen);
             return (
               <article className="card" key={v._id} style={style}>
                 <div className="card-top">
@@ -172,6 +167,11 @@ export default function Home() {
                     </div>
                     <h3 className="title">{v.titulo}</h3>
                     <p className="meta"><span className="co">{v.empresa}</span>{v.local ? <><span className="sep">·</span>{v.local}</> : null}</p>
+                    <p className="datas">
+                      <span className="src">{v.fonte}</span>
+                      {coleta && <>· Coletada {coleta}</>}
+                      {v.postada && <>· Postada {v.postada}</>}
+                    </p>
                   </div>
                   <div className="nota"><div className="val">{v.nota ?? "–"}</div><div className="max">/ 10</div></div>
                 </div>
@@ -186,16 +186,10 @@ export default function Home() {
                   </div>
                 )}
 
-                {v.cvFile && (
-                  <p className="cv">Currículo: <b>{v.cv}</b> <span className="file">{v.cvFile}</span></p>
-                )}
-
                 <div className="foot">
-                  <div className="foot-row">
-                    <span className="src">{v.fonte}</span>
-                    {v.link && <a className="link" href={v.link} target="_blank" rel="noopener noreferrer">Ver vaga <IconExt /></a>}
-                  </div>
-
+                  {v.link && (
+                    <a className="ver-vaga" href={v.link} target="_blank" rel="noopener noreferrer">Ver vaga <IconExt /></a>
+                  )}
                   {view === "inbox" ? (
                     <div className="actions">
                       <button className="act enviar" onClick={() => setStatus(v._id, "enviado")}>✓ CV Enviado</button>
@@ -212,8 +206,6 @@ export default function Home() {
           })}
         </div>
       </main>
-
-      {toast && <div className="toast">{toast}</div>}
     </>
   );
 }
