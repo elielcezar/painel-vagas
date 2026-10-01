@@ -10,6 +10,12 @@ const FRENTE = {
 const notaVars = (n) =>
   n >= 8 ? { c: "var(--good)", s: "var(--good-soft)" } : n >= 6 ? { c: "var(--mid)", s: "var(--mid-soft)" } : { c: "var(--low)", s: "var(--low-soft)" };
 
+// "2026-09-23" -> "23/09/2026" (sem conversão de fuso, para não "voltar" um dia)
+function fmtData(ymd) {
+  const m = /^(\d{4})-(\d{2})-(\d{2})/.exec(ymd || "");
+  return m ? `${m[3]}/${m[2]}/${m[1]}` : null;
+}
+
 function fmtColeta(iso) {
   if (!iso) return null;
   try {
@@ -155,7 +161,8 @@ export default function Home() {
             const fv = FRENTE[v.frente] || { c: "var(--line)", s: "var(--surface-2)" };
             const nv = notaVars(v.nota ?? 0);
             const style = { "--frente-color": fv.c, "--frente-soft": fv.s, "--nota-color": nv.c, "--nota-soft": nv.s };
-            const coleta = fmtColeta(v.firstSeen);
+            const coleta = fmtColeta(v.coletadaEm || v.firstSeen);
+            const postada = fmtData(v.postadaEm);
             return (
               <article className="card" key={v._id} style={style}>
                 <div className="card-top">
@@ -169,8 +176,12 @@ export default function Home() {
                     <p className="meta"><span className="co">{v.empresa}</span>{v.local ? <><span className="sep">·</span>{v.local}</> : null}</p>
                     <p className="datas">
                       <span className="src">{v.fonte}</span>
+                      {postada && (
+                        <span title={v.postadaAprox ? "Data estimada: a fonte só informa o tempo relativo (ex.: “há 2 semanas”)" : "Data informada pela fonte"}>
+                          · Postada {v.postadaAprox ? "~" : ""}{postada}
+                        </span>
+                      )}
                       {coleta && <>· Coletada {coleta}</>}
-                      {v.postada && <>· Postada {v.postada}</>}
                     </p>
                   </div>
                   <div className="nota"><div className="val">{v.nota ?? "–"}</div><div className="max">/ 10</div></div>

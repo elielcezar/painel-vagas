@@ -55,10 +55,12 @@ npm run importar -- data/vagas.seed.json     # deve mostrar "Backend: MongoDB"
 { "_id": "linkedin:4466160189", "fonte": "LinkedIn",
   "titulo": "…", "empresa": "…", "local": "Brasil · Remoto",
   "frente": "Front-end", "nota": 9, "motivo": "…", "alertas": ["…"],
-  "postada": "há 2 dias",
+  "postadaEm": "2026-09-23", "postadaAprox": true,
+  "coletadaEm": "2026-09-30T23:15:00.000Z",
   "link": "https://www.linkedin.com/jobs/view/4466160189/" }
 ```
-`postada` é opcional (quando a fonte mostra a data de publicação). A data/hora de **coleta** é gravada automaticamente no import (`firstSeen`).
+- `postadaEm` / `postadaAprox`: data de publicação no site. No LinkedIn é **estimada** a partir de "há X dias" (`postadaAprox: true`, card mostra `~`); na Gupy é exata.
+- `coletadaEm`: data/hora da coleta. No banco, a primeira coleta é mantida; uma data de publicação exata substitui uma estimada.
 ```bash
 npm run importar -- entradas/AAAAMMDD.json
 ```

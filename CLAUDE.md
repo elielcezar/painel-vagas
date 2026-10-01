@@ -26,17 +26,27 @@ sem ficar perguntando (só pare se algo bloquear, ex.: Chrome desconectado ou lo
 > **Limite honesto:** a busca precisa do Chrome logado com a conta dele, então **não roda por cron sem supervisão** (agente na nuvem não tem o login do LinkedIn/Gupy). Ele dispara à noite, a rodada coleta/tria e importa no painel; de manhã ele revisa.
 
 ### Schema da entrada (`entradas/AAAAMMDD.json`)
-Array de objetos. `_id` é a chave de dedup: `"<fonte>:<jobId>"` (jobId vem da URL `/jobs/view/<id>/`);
-sem jobId, usar `"<fonte>:<slug-empresa-titulo>"`. `frente` deve ser exatamente **Front-end**, **UI/UX** ou **Híbrida**.
+Array de objetos. `frente` deve ser exatamente **Front-end**, **UI/UX** ou **Híbrida**.
+
+**Dedup é garantido pelo código (`lib/merge.mjs`), não pela coleta.** Basta mandar `link`, `empresa` e `titulo` fiéis à fonte:
+- O importador **calcula o `_id` a partir do link** (`linkedin:<id>` de `/jobs/view/<id>/`, `gupy:<jobId>` decodificando a URL da Gupy, `workana:<slug>`); o `_id` do JSON só é usado se o link não tiver padrão conhecido.
+- Além do ID, compara uma **chave empresa + título normalizados** (sem acento/caixa/pontuação) com tudo que já está no banco. Se bater, a vaga é mesclada na existente (mantém status e datas), e o novo ID entra em `ids`. Isso pega **republicação com outro ID** e **a mesma vaga em fontes diferentes**, inclusive repetidas dentro do mesmo arquivo.
+- Limite conhecido: duas vagas **diferentes** com empresa e título idênticos seriam tratadas como uma.
 ```json
 { "_id": "linkedin:4466160189", "fonte": "LinkedIn",
   "titulo": "…", "empresa": "…", "local": "Brasil · Remoto",
   "frente": "Front-end", "nota": 9, "motivo": "…", "alertas": ["…"],
-  "postada": "há 2 dias",
+  "postadaEm": "2026-09-23", "postadaAprox": true,
+  "coletadaEm": "2026-09-30T23:15:00.000Z",
   "link": "https://www.linkedin.com/jobs/view/4466160189/" }
 ```
-- `postada` (opcional): quando a vaga foi **publicada**, como aparece na fonte (ex.: `"há 2 dias"`, `"25/09/2026"`). Preencher sempre que a página mostrar; o card exibe junto da data de coleta.
-- A **data/hora de coleta** não vai no JSON: o import grava `firstSeen` automaticamente e o card mostra “Coletada DD/MM/AAAA HH:MM”.
+- **`coletadaEm`** (ISO com hora, UTC): momento da coleta — use o horário da rodada. No banco, a **primeira** coleta vence (reimportar não altera).
+- **`postadaEm`** (`AAAA-MM-DD`, data local de Brasília) + **`postadaAprox`** (bool): quando a vaga foi publicada no site. Sempre preencher quando a fonte mostrar algo:
+  - **LinkedIn:** a página logada **não tem data exata** (sem JSON-LD/`<time>`), só o relativo do topo do card (“2 weeks ago”, “Reposted 1 week ago”, “há 3 dias”). Calcular `coletadaEm − intervalo` → `postadaAprox: true`. “Reposted” = data do repost.
+  - **Gupy:** “Publicada em: DD/MM/AAAA” → data exata, `postadaAprox: false`.
+  - **Workana:** “Publicado: há X horas/dias” → estimada, `postadaAprox: true`.
+- No banco, uma data **exata** substitui uma estimada; uma estimada nunca substitui outra já gravada (regra em `lib/merge.mjs`).
+- O card mostra “Postada ~23/09/2026” (o `~` indica estimada) e “Coletada 30/09/2026 às 20:15”.
 
 ### Receita de busca (URLs prontas)
 LinkedIn — filtros: `f_WT=2` (remoto), `f_E=3,4,5` (pleno/sênior/diretor; exclui estágio e júnior):
@@ -73,7 +83,7 @@ Dicas: `get_page_text` no card selecionado do LinkedIn traz a descrição inteir
 - Frente: Front-end, UI/UX ou Híbrida.
 - Compatibilidade de 0 a 10, com o motivo.
 - Alertas: inglês fluente obrigatório, tecnologia que ele não domina, modelo de trabalho incompatível, vaga exclusiva PcD, PJ, nível abaixo do perfil.
-- Data de publicação (`postada`), quando a fonte informar.
+- Data de publicação (`postadaEm`/`postadaAprox`) e de coleta (`coletadaEm`).
 
 ## O painel (este projeto)
 App Next.js na **raiz** do projeto (não há mais subpasta `painel/`).
