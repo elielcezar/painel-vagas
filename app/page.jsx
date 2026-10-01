@@ -158,7 +158,7 @@ export default function Home() {
           )}
 
           {lista.map((v) => {
-            const fv = FRENTE[v.frente] || { c: "var(--line)", s: "var(--surface-2)" };
+            const fv = FRENTE[v.frente] || { c: "var(--low)", s: "var(--low-soft)" };
             const nv = notaVars(v.nota ?? 0);
             const style = { "--frente-color": fv.c, "--frente-soft": fv.s, "--nota-color": nv.c, "--nota-soft": nv.s };
             const coleta = fmtColeta(v.coletadaEm || v.firstSeen);
