@@ -195,11 +195,12 @@ export default function Home() {
                   <div>
                     <div className="badges">
                       <span className="frente">{v.frente}</span>
+                      {v.tipo === "Freela" && <span className="status-pill st-freela">Freela</span>}
                       {v.status === "enviado" && <span className="status-pill st-enviado">CV enviado</span>}
                       {v.status === "dispensado" && <span className="status-pill st-dispensado">Dispensada</span>}
                     </div>
                     <h3 className="title">{v.titulo}</h3>
-                    <p className="meta"><span className="co">{v.empresa}</span>{v.local ? <><span className="sep">·</span>{v.local}</> : null}</p>
+                    <p className="meta"><span className="co">{v.empresa}</span>{v.local ? <><span className="sep">·</span>{v.local}</> : null}{v.faixa ? <><span className="sep">·</span><span className="faixa">{v.faixa}</span></> : null}</p>
                     <p className="datas">
                       <span className="src">{v.fonte}</span>
                       {postada && (

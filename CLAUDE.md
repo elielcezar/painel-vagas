@@ -13,7 +13,7 @@ O Eliel roda a busca **toda noite** com o Chrome aberto e logado. Para disparar,
 sem ficar perguntando (só pare se algo bloquear, ex.: Chrome desconectado ou login caído):
 
 1. **Carregar as ferramentas do Claude in Chrome** e pegar o contexto das abas. Abrir **abas novas**, nunca mexer nas dele.
-2. **Rodar as buscas** da “Receita de busca” abaixo (LinkedIn, Gupy, Workana) — **incluindo a frente Agências / Curitiba** (presencial + híbrido), não só tech remoto.
+2. **Rodar TODAS as buscas** da “Receita de busca” abaixo, sem pular nenhuma: LinkedIn (remoto + **híbridas** + frente **Agências / Curitiba**), Gupy e **Workana (freelas — sempre incluir, toda rodada)**. Não aplicar filtro de recência na busca (o painel já filtra).
 3. **Triar** cada item (ver “Triagem”). Ler a descrição completa das mais promissoras; para o resto, triagem preliminar por card.
 4. **Gravar no painel:** escrever as vagas de hoje em `entradas/AAAAMMDD.json` (schema abaixo) e importar:
    ```bash
@@ -40,6 +40,7 @@ Array de objetos. `frente` deve ser exatamente **Front-end**, **UI/UX** ou **Hí
   "coletadaEm": "2026-09-30T23:15:00.000Z",
   "link": "https://www.linkedin.com/jobs/view/4466160189/" }
 ```
+- **`tipo`**: `"Vaga"` (padrão, pode omitir) ou `"Freela"`. Freela leva também **`faixa`** (ex.: `"USD 250–500"`) e usa `empresa` = nome do cliente (ou `"Cliente Workana"`).
 - **`coletadaEm`** (ISO com hora, UTC): momento da coleta — use o horário da rodada. No banco, a **primeira** coleta vence (reimportar não altera).
 - **`postadaEm`** (`AAAA-MM-DD`, data local de Brasília) + **`postadaAprox`** (bool): quando a vaga foi publicada no site. Sempre preencher quando a fonte mostrar algo:
   - **LinkedIn:** a página logada **não tem data exata** (sem JSON-LD/`<time>`), só o relativo do topo do card (“2 weeks ago”, “Reposted 1 week ago”, “há 3 dias”). Calcular `coletadaEm − intervalo` → `postadaAprox: true`. “Reposted” = data do repost.
@@ -53,10 +54,11 @@ LinkedIn — filtros: `f_WT=2` (remoto), `f_E=3,4,5` (pleno/sênior/diretor; exc
 - Front-end: `https://www.linkedin.com/jobs/search/?keywords=Desenvolvedor%20Front-end&location=Brasil&f_WT=2&f_E=3%2C4%2C5`
 - React remoto: `https://www.linkedin.com/jobs/search/?keywords=Front-end%20React&location=Brasil&f_WT=2&f_E=3%2C4%2C5&sortBy=DD`
 - UI/UX: `https://www.linkedin.com/jobs/search/?keywords=Product%20Designer&location=Brasil&f_WT=2&f_E=3%2C4%2C5`
+- **Híbridas** (design + código): mesma URL trocando `keywords=` por `Design%20Engineer`, `UI%20Engineer` e `Design%20System`. No Brasil muitas retornam front-end comum — triar e marcar como **Híbrida** só as que pedem os dois lados (design system, Figma + código).
 
 Gupy: `https://portal.gupy.io/job-search/term=front-end` e `.../term=product%20designer`.
 
-Workana (público, sem login; **não** aceitar cookies): `https://www.workana.com/jobs?language=pt&query=front-end`, `...&category=design-multimedia&query=UI%20UX`, `...&category=design-multimedia&query=aplicativo%20mobile`.
+Workana — **freelas, incluir SEMPRE** (público, sem login; **não** aceitar cookies). Gravar com `"tipo": "Freela"` e `faixa` (orçamento). Descartar projetos irrelevantes (no-code/Bubble/Flutter, motion/animação, POS/.NET) e os de orçamento irrisório para o escopo: `https://www.workana.com/jobs?language=pt&query=front-end`, `...&category=design-multimedia&query=UI%20UX`, `...&category=design-multimedia&query=aplicativo%20mobile`.
 
 > **99Freelas foi removida** (qualidade baixa, trabalhos por ~R$50). Não incluir.
 
@@ -78,6 +80,8 @@ Dicas: `get_page_text` no card selecionado do LinkedIn traz a descrição inteir
 - Níveis: Pleno, Sênior, Tech Lead/Staff. Excluir estágio, júnior e trainee.
 - **Incluir agências de publicidade** (não só tech) — ver a frente “Agências / Curitiba”.
 - Fontes: **LinkedIn, Gupy e Workana**, pelo Claude in Chrome, com o login do Eliel (Workana é pública).
+- **Freelas entram em toda rodada** (Workana), junto com as vagas — não precisa o Eliel pedir.
+- **Sem filtro de recência** na busca; vagas antigas podem entrar (o painel filtra e o dedup barra repetidas).
 
 ## Triagem (para cada vaga)
 - Frente: Front-end, UI/UX ou Híbrida.
